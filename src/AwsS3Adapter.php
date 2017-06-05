@@ -120,9 +120,9 @@ class AwsS3Adapter extends AbstractAdapter
      */
     public function has($path)
     {
-        $location = $this->applyPathPrefix($path);
+        $options = $this->getOptions($path);
 
-        return $this->client->doesObjectExist($this->bucket, $location);
+        return $this->client->doesObjectExist($this->bucket, $options['Key'], $options);
     }
 
     /**
@@ -481,6 +481,10 @@ class AwsS3Adapter extends AbstractAdapter
         $options = array_merge($this->options, $options);
         $options['Key']    = $this->applyPathPrefix($path);
         $options['Bucket'] = $this->bucket;
+
+        if(!preg_match('/amazonaws.com/',$this->client->getBaseUrl())) {
+            $options['PathStyle'] = true;
+        }
 
         if ($config) {
             $options = array_merge($options, $this->getOptionsFromConfig($config));
